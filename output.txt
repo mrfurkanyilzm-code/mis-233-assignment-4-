@@ -1,0 +1,100 @@
+
+> destructuring-guide@0.0.0 all
+> npm run js && npm run ts
+
+
+> destructuring-guide@0.0.0 js
+> node js/arrays.mjs && node js/objects.mjs && node js/params.mjs && node js/pitfalls.mjs && tsx js/props.jsx
+
+form 1 (starter): 2 9
+form 1 (route): 1650 3932
+form 2: Deniz Gölü Camp [ 'North Ridge', 'Summit Push' ]
+form 3: Mert Furkan
+form 4: 70m Dry Rope | 30m Static | Helmet | Chalk Bag
+form 5 (starter): Buy milk todo
+form 5 (route): Kaçkar North Face 3932
+form 6: Kaçkar North Face 3932
+form 7: false AD+
+form 8: KCK-04 { peak: 'Kaçkar North Face', grade: 'AD+', elevation: 3932 }
+form 9: Furkan BÜDAK Yukarı Kavrun [ 'Dilberdüzü', 'Deniz Gölü' ]
+form 10: AD+
+form 11 (starter): { title: 'Read', status: 'todo' }
+form 11 (route): Erciyes (3d, winter=false)
+form 11 (empty call): Aladağlar Demirkazık (2d, winter=false)
+form 11b: lat:40.84, lon:41.16, alt:3932m
+form 12 (Object.entries): tent:1850g, stove:320g, rope:4100g
+form 12 (Map): Dilberdüzü@2850m -> Deniz Gölü@3380m
+pitfall 1: TypeError
+pitfall 2: { visibilityKm: null, windKnots: 12 }
+pitfall 3 (without parens): SyntaxError
+pitfall 3 (with parens): Süphan
+pitfall 4 (original mutated): [ 'Axe', 'Helmet', 'Crampons' ]
+pitfall 5 (object): Base Camp | Summit Camp
+pitfall 5 (array): Summit Camp | Base Camp
+P1 A: <section><h2>Hi</h2>text</section>
+P1 B: <section><h2>Hi</h2>text</section>
+P2 tag body: <section><h2>Kaçkar</h2>Ridge route</section>
+P2 prop attr: <section><h2>Kaçkar</h2>Ridge route</section>
+P3 string: <div data-case="string">Base camp</div>
+P3 number: <div data-case="number">3932</div>
+P3 one-el: <div data-case="one-el"><span>Alpine</span></div>
+P3 multi-el: <div data-case="multi-el"><span>Day 1</span><span>Day 2</span></div>
+P3 undefined: <div data-case="undef"></div>
+P3 null: <div data-case="null"></div>
+P3 false: <div data-case="false"></div>
+P3 function: <div data-case="fn"></div>
+P4 rest-wins: <section class="panel-custom" id="route-1"><h3>Aladağlar</h3><p>2 days</p></section>
+P4 explicit-wins: <section id="route-1" class="panel-forced"><h3>Aladağlar</h3><p>2 days</p></section>
+P5 props: <article><header><h2>Erciyes</h2></header><p>North ridge</p><footer>3917m</footer></article>
+P5 children: <article><header><h2>Erciyes</h2></header><p>North ridge</p><footer>3917m</footer></article>
+P6 omitted: <span class="badge">Unrated</span>
+P6 undefined: <span class="badge">Unrated</span>
+P6 null: <span class="badge"></span>
+
+> destructuring-guide@0.0.0 ts
+> tsx ts/arrays.ts && tsx ts/objects.ts && tsx ts/params.ts && tsx ts/types.ts && tsx ts/props.tsx
+
+form 1 (starter): 2 9
+form 1 (route): 1650 3932
+form 2: Deniz Gölü Camp [ 'North Ridge', 'Summit Push' ]
+form 3: Mert Furkan
+form 4: 70m Dry Rope | 30m Static
+form 5 (starter): Buy milk todo
+form 5 (route): Kaçkar North Face 3932
+form 6: Kaçkar North Face 3932
+form 7: false
+form 8: KCK-04 { peak: 'Kaçkar North Face', grade: 'AD+', elevation: 3932 }
+form 9: Furkan BÜDAK Yukarı Kavrun [ 'Dilberdüzü', 'Deniz Gölü' ]
+form 10: AD+
+form 11 (starter): { title: 'Read', status: 'todo' }
+form 11 (route): Erciyes (3d, winter=false)
+form 11 (empty call): Aladağlar Demirkazık (2d, winter=false)
+form 11b: lat:40.84, lon:41.16, alt:3932m
+form 12 (Object.entries): tent:1850g, stove:320g, rope:4100g
+form 12 (Map): Dilberdüzü@2850m -> Deniz Gölü@3380m
+T1: 1 2
+T2: 2850 Dilberdüzü | Base High Camp
+T3: ICE AXE | Ice Axe
+T4: boolean true | boolean false
+T5: undefined | fixed: Clear
+P1 A: <section><h2>Hi</h2>text</section>
+P1 B: <section><h2>Hi</h2>text</section>
+P2 tag body: <section><h2>Kaçkar</h2>Ridge route</section>
+P2 prop attr: <section><h2>Kaçkar</h2>Ridge route</section>
+P3 string: <div data-case="string">Base camp</div>
+P3 number: <div data-case="number">3932</div>
+P3 one-el: <div data-case="one-el"><span>Alpine</span></div>
+P3 multi-el: <div data-case="multi-el"><span>Day 1</span><span>Day 2</span></div>
+P3 undefined: <div data-case="undef"></div>
+P3 null: <div data-case="null"></div>
+P3 false: <div data-case="false"></div>
+P4 rest-wins: <section class="panel-custom" id="route-1"><h3>Aladağlar</h3><p>2 days</p></section>
+P4 explicit-wins: <section id="route-1" class="panel-forced"><h3>Aladağlar</h3><p>2 days</p></section>
+P5 props: <article><header><h2>Erciyes</h2></header><p>North ridge</p><footer>3917m</footer></article>
+P5 children: <article><header><h2>Erciyes</h2></header><p>North ridge</p><footer>3917m</footer></article>
+P6 omitted: <span class="badge">Unrated</span>
+P6 undefined: <span class="badge">Unrated</span>
+P6 null: <span class="badge"></span>
+P7 ReactNode: <div><strong>Gear</strong>Rope</div>
+P7 PropsWithChildren: <div><strong>Camp</strong>Tent</div>
+P7 ComponentProps: <button data-variant="primary" type="submit" disabled="" aria-label="Save route">Save</button>

@@ -1,0 +1,448 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[a4paper, margin=2.2cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english, bidi=basic, provide=*]{babel}
+\babelprovide[import, onchar=ids fonts]{english}
+\babelfont{rm}{Noto Sans}
+\babelfont{tt}{Noto Sans Mono}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+
+\definecolor{accentblue}{HTML}{1A58A5}
+\definecolor{codebg}{HTML}{F4F7FB}
+\definecolor{codeframe}{HTML}{D3DCE8}
+\definecolor{commentgray}{HTML}{546880}
+\definecolor{keywordpurple}{HTML}{6A3FB0}
+\definecolor{stringteal}{HTML}{0B6B50}
+\definecolor{rowtint}{HTML}{F8FAFC}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accentblue,
+  urlcolor=accentblue,
+  pdftitle={Destructuring Field Guide - MIS 233 Assignment 4},
+  pdfauthor={Muhammet Furkan Yılmaz}
+}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={const, let, var, function, return, if, else, for, of, in, try, catch, throw, new, typeof, undefined, null, true, false, import, from, export, default, type, interface, as, readonly, infer, extends},
+  keywordstyle=\color{keywordpurple}\bfseries,
+  ndkeywords={string, number, boolean, unknown, never, ReactNode, PropsWithChildren, ComponentProps},
+  ndkeywordstyle=\color{accentblue}\bfseries,
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{commentgray}\itshape,
+  stringstyle=\color{stringteal},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`
+}
+
+\lstset{
+  language=JavaScript,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  frameround=tttt,
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=flexible,
+  keepspaces=true,
+  showstringspaces=false,
+  aboveskip=8pt,
+  belowskip=8pt,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  literate=
+    {ç}{{ç}}1 {Ç}{{Ç}}1
+    {ğ}{{ğ}}1 {Ğ}{{Ğ}}1
+    {ı}{{ı}}1 {İ}{{İ}}1
+    {ö}{{ö}}1 {Ö}{{Ö}}1
+    {ş}{{ş}}1 {Ş}{{Ş}}1
+    {ü}{{ü}}1 {Ü}{{Ü}}1
+    {→}{{$\rightarrow$}}1
+}
+
+\title{\textbf{Destructuring Field Guide}\\
+\large JavaScript, TypeScript (Strict), and React \texttt{props} \& \texttt{children}}
+\author{Muhammet Furkan Yılmaz \\ Student Number: 2024502108 \\ \small MIS 233 Web Based Application Programming, Fall 2026}
+\date{November 2026}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{Bonuses Claimed:} Bonus 1: LaTeX, Bonus 2: Depth, Bonus 3: Real code, Bonus 4: Git repository.
+
+\tableofcontents
+\newpage
+
+\section{Overview and Project Execution}
+
+This field guide documents destructuring patterns in JavaScript and strict TypeScript, followed by how React components unpack \texttt{props} and \texttt{children}. Every code listing and runtime output in this document comes from a real execution of the project using a custom Trail \& Climbing Log domain dataset.
+
+\begin{lstlisting}
+npm install
+npm run all      # runs all JavaScript and TypeScript examples
+npm run check    # runs tsc --noEmit in strict + noUncheckedIndexedAccess mode
+\end{lstlisting}
+
+\noindent\textbf{Plain Assignments vs.\ Destructuring and \texttt{...rest} vs.\ \texttt{...spread}:}
+Every destructuring pattern is concise syntax for sequential index or property lookups (such as \texttt{const startAlt = span[0]} or \texttt{const peak = route.peak}). Furthermore, \texttt{...rest} on the left-hand side of an assignment \emph{collects} remaining elements into a new array or object, whereas \texttt{...spread} inside an expression \emph{expands} an existing array or object into individual items or properties.
+
+\section{The Twelve Destructuring Forms}
+
+\subsection{Form 1: Array Destructuring by Position, \texttt{const [x, y] = f()}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const [startAlt, summitAlt] = routeAltitudeSpan(checkpoints)}
+  \item \textbf{Example} (from \texttt{js/arrays.mjs}):
+\begin{lstlisting}
+function routeAltitudeSpan(checkpoints) {
+  return [checkpoints[0], checkpoints[checkpoints.length - 1]]
+}
+const [startAlt, summitAlt] = routeAltitudeSpan([1650, 2400, 3150, 3932])
+console.log('form 1 (route):', startAlt, summitAlt)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 1 (route): 1650 3932}
+  \item \textbf{Use it when:} A function returns a fixed-order pair or tuple and you want descriptive local variables immediately instead of indexing \texttt{span[0]} and \texttt{span[1]}.
+  \item \textbf{Watch out:} Order is strictly positional; swapping the variable names silently swaps their values, and missing positions evaluate to \texttt{undefined}.
+\end{itemize}
+
+\subsection{Form 2: Skip an Item and Collect the Rest, \texttt{const [, second, ...others] = list}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const [, secondStage, ...remainingStages] = stages}
+  \item \textbf{Example} (from \texttt{js/arrays.mjs}):
+\begin{lstlisting}
+const stages = ['Dilberdüzü Base', 'Deniz Gölü Camp', 'North Ridge', 'Summit Push']
+const [, secondStage, ...remainingStages] = stages
+console.log('form 2:', secondStage, remainingStages)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 2: Deniz Gölü Camp [ 'North Ridge', 'Summit Push' ]}
+  \item \textbf{Use it when:} You want to ignore leading items (such as a base camp or header row) and capture the remaining tail as a new array (\texttt{stages.slice(2)}).
+  \item \textbf{Watch out:} The rest element must appear last in the array pattern (\texttt{SyntaxError} otherwise). Under TypeScript's \texttt{noUncheckedIndexedAccess}, \texttt{secondStage} has type \texttt{string | undefined}.
+\end{itemize}
+
+\subsection{Form 3: Swap Two Variables Without a Temporary, \texttt{[a, b] = [b, a]}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{[leadClimber, belayer] = [belayer, leadClimber]}
+  \item \textbf{Example} (from \texttt{js/arrays.mjs}):
+\begin{lstlisting}
+let leadClimber = 'Furkan'
+let belayer = 'Mert'
+;[leadClimber, belayer] = [belayer, leadClimber]
+console.log('form 3:', leadClimber, belayer)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 3: Mert Furkan}
+  \item \textbf{Use it when:} Rotating roles or reordering two mutable \texttt{let} bindings in place without introducing a temporary variable.
+  \item \textbf{Watch out:} Both variables must be declared with \texttt{let}, and if semicolons are omitted, prefix the line with \texttt{;[} so JavaScript does not parse \texttt{[} as subscripting the previous statement.
+\end{itemize}
+
+\subsection{Form 4: Default Values in Arrays, \texttt{const [a = 1, b = 2] = []}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const [primaryRope = '60m Dynamic', backupRope = '30m Static'] = providedRopes}
+  \item \textbf{Example} (from \texttt{js/arrays.mjs}):
+\begin{lstlisting}
+const providedRopes = ['70m Dry Rope']
+const [primaryRope = '60m Dynamic', backupRope = '30m Static'] = providedRopes
+const [missingFirst = 'Helmet', missingSecond = 'Harness'] = [undefined, 'Chalk Bag']
+console.log('form 4:', primaryRope, '|', backupRope, '|', missingFirst, '|', missingSecond)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 4: 70m Dry Rope | 30m Static | Helmet | Chalk Bag}
+  \item \textbf{Use it when:} An input array may be shorter than expected or contain \texttt{undefined} entries that need fallback values.
+  \item \textbf{Watch out:} Defaults trigger \emph{only} when an element is missing or strictly \texttt{undefined}; passing \texttt{null} or \texttt{''} preserves \texttt{null} or \texttt{''}.
+\end{itemize}
+
+\subsection{Form 5: Properties by Name, \texttt{let \{ a, b \} = t}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const \{ peak, elevation \} = route}
+  \item \textbf{Example} (from \texttt{js/objects.mjs}):
+\begin{lstlisting}
+const route = {
+  code: 'KCK-04',
+  peak: 'Kaçkar North Face',
+  grade: 'AD+',
+  elevation: 3932
+}
+const { peak, elevation } = route
+console.log('form 5 (route):', peak, elevation)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 5 (route): Kaçkar North Face 3932}
+  \item \textbf{Use it when:} Extracting multiple fields from a record where the property keys already match the desired local variable names.
+  \item \textbf{Watch out:} Property order does not matter because lookup happens by key name; misspelling a property produces \texttt{undefined} in JavaScript and a compile-time error in TypeScript.
+\end{itemize}
+
+\subsection{Form 6: Rename While You Take It, \texttt{const \{ a: alpha \} = t}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const \{ peak: summitName, elevation: meters \} = route}
+  \item \textbf{Example} (from \texttt{js/objects.mjs}):
+\begin{lstlisting}
+const { peak: summitName, elevation: meters } = route
+console.log('form 6:', summitName, meters)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 6: Kaçkar North Face 3932}
+  \item \textbf{Use it when:} A property name collides with an existing identifier in scope or is too vague in the local context.
+  \item \textbf{Watch out:} The source property sits on the left of \texttt{:} and the new local binding sits on the right; \texttt{peak} is not declared as a variable.
+\end{itemize}
+
+\subsection{Form 7: Default Values in Objects, \texttt{const \{ a = 1 \} = t}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const \{ permitRequired = false, grade = 'F' \} = route}
+  \item \textbf{Example} (from \texttt{js/objects.mjs}):
+\begin{lstlisting}
+const { permitRequired = false, grade = 'F' } = route
+console.log('form 7:', permitRequired, grade)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 7: false AD+}
+  \item \textbf{Use it when:} Reading optional configuration properties so downstream logic works with concrete values rather than \texttt{undefined}.
+  \item \textbf{Watch out:} An explicit \texttt{null} property on the object does \emph{not} activate the default value.
+\end{itemize}
+
+\subsection{Form 8: Rest in an Object, \texttt{const \{ a, ...others \} = t}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const \{ code, ...routeDetails \} = route}
+  \item \textbf{Example} (from \texttt{js/objects.mjs}):
+\begin{lstlisting}
+const { code, ...routeDetails } = route
+console.log('form 8:', code, routeDetails)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 8: KCK-04 \{ peak: 'Kaçkar North Face', grade: 'AD+', elevation: 3932 \}}
+  \item \textbf{Use it when:} Omitting one or two control properties (such as \texttt{code}, \texttt{id}, or \texttt{children}) and collecting the remaining properties into a new object.
+  \item \textbf{Watch out:} \texttt{routeDetails} is a shallow copy; nested arrays or objects inside it still share references with \texttt{route}.
+\end{itemize}
+
+\subsection{Form 9: Nested Patterns and Arrays Inside Objects, \texttt{const \{ p: \{ x \}, list: [first] \} = t}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const \{ leader: \{ name: leaderName, club \}, camps: [firstCamp, ...upperCamps] \} = expedition}
+  \item \textbf{Example} (from \texttt{js/objects.mjs}):
+\begin{lstlisting}
+const expedition = {
+  id: 'EXP-2026',
+  leader: { name: 'Furkan', club: 'BÜDAK' },
+  camps: ['Yukarı Kavrun', 'Dilberdüzü', 'Deniz Gölü']
+}
+const {
+  leader: { name: leaderName, club },
+  camps: [firstCamp, ...upperCamps]
+} = expedition
+console.log('form 9:', leaderName, club, firstCamp, upperCamps)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 9: Furkan BÜDAK Yukarı Kavrun [ 'Dilberdüzü', 'Deniz Gölü' ]}
+  \item \textbf{Use it when:} Unpacking a known, fixed-shape structured object two levels deep in one readable declaration.
+  \item \textbf{Watch out:} If \texttt{expedition.leader} is \texttt{undefined} or \texttt{null}, destructuring throws a \texttt{TypeError}; moreover, \texttt{leader} itself is not bound as a variable.
+\end{itemize}
+
+\subsection{Form 10: Computed Key, \texttt{const \{ [key]: value \} = t}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{const \{ [selectedField]: chosenGrade \} = route}
+  \item \textbf{Example} (from \texttt{js/objects.mjs}):
+\begin{lstlisting}
+const selectedField = 'grade'
+const { [selectedField]: chosenGrade } = route
+console.log('form 10:', chosenGrade)
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 10: AD+}
+  \item \textbf{Use it when:} The property key to extract is determined dynamically at runtime via a variable or expression.
+  \item \textbf{Watch out:} A computed key must always provide a target alias (\texttt{: chosenGrade}) because a dynamic expression cannot act as a variable identifier.
+\end{itemize}
+
+\subsection{Form 11: Patterns in Parameters with Defaults, \texttt{function f(\{ a = 1, b \}: Options = \{\})}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{function planExpedition(\{ peak = 'Aladağlar Demirkazık', days = 2, winterGear = false \} = \{\})}
+  \item \textbf{Example} (from \texttt{js/params.mjs}):
+\begin{lstlisting}
+function planExpedition({ peak = 'Aladağlar Demirkazık', days = 2, winterGear = false } = {}) {
+  return `${peak} (${days}d, winter=${winterGear})`
+}
+console.log('form 11 (route):', planExpedition({ peak: 'Erciyes', days: 3 }))
+console.log('form 11 (empty call):', planExpedition())
+\end{lstlisting}
+  \item \textbf{Real Output:}
+\begin{lstlisting}
+form 11 (route): Erciyes (3d, winter=false)
+form 11 (empty call): Aladağlar Demirkazık (2d, winter=false)
+\end{lstlisting}
+  \item \textbf{Use it when:} Writing functions or React components that take an options object where callers may omit specific fields or call the function with no arguments.
+  \item \textbf{Watch out:} You need both the inner field defaults (\texttt{days = 2}) and the outer parameter default (\texttt{= \{\}}); omitting \texttt{= \{\}} causes \texttt{planExpedition()} to throw a \texttt{TypeError}.
+\end{itemize}
+
+\subsection{Form 12: Patterns in Loops, \texttt{for (const [k, v] of Object.entries(o))} and \texttt{Map}}
+\begin{itemize}
+  \item \textbf{Syntax:} \texttt{for (const [item, grams] of Object.entries(packWeights))}
+  \item \textbf{Example} (from \texttt{js/params.mjs}):
+\begin{lstlisting}
+const packWeights = { tent: 1850, stove: 320, rope: 4100 }
+const weightSummary = []
+for (const [item, grams] of Object.entries(packWeights)) {
+  weightSummary.push(`${item}:${grams}g`)
+}
+console.log('form 12 (Object.entries):', weightSummary.join(', '))
+\end{lstlisting}
+  \item \textbf{Real Output:} \texttt{form 12 (Object.entries): tent:1850g, stove:320g, rope:4100g}
+  \item \textbf{Use it when:} Iterating over \texttt{[key, value]} tuples yielded by \texttt{Object.entries()}, a \texttt{Map}, or \texttt{array.entries()}.
+  \item \textbf{Watch out:} Use \texttt{for...of} on iterables rather than \texttt{for...in}, which yields string property names instead of entry pairs.
+\end{itemize}
+
+\section{Five Destructuring Pitfalls}
+
+\begin{enumerate}
+  \item \textbf{Destructuring \texttt{undefined} or \texttt{null} throws a \texttt{TypeError}} (\texttt{js/pitfalls.mjs}):
+\begin{lstlisting}
+try {
+  const { a } = undefined
+} catch (error) {
+  console.log('pitfall 1:', error.constructor.name)
+}
+\end{lstlisting}
+  \textbf{Real Output:} \texttt{pitfall 1: TypeError}\\
+  \textbf{Why it happens:} Destructuring attempts to coerce the right-hand side into an object (or look up \texttt{[Symbol.iterator]}), and neither \texttt{undefined} nor \texttt{null} can be converted to an object.
+
+  \item \textbf{Default values apply only to \texttt{undefined}, never to \texttt{null}} (\texttt{js/pitfalls.mjs}):
+\begin{lstlisting}
+const weatherReport = { visibilityKm: null, windKnots: undefined }
+const { visibilityKm = 10, windKnots = 12 } = weatherReport
+console.log('pitfall 2:', { visibilityKm, windKnots })
+\end{lstlisting}
+  \textbf{Real Output:} \texttt{pitfall 2: \{ visibilityKm: null, windKnots: 12 \}}\\
+  \textbf{Why it happens:} JavaScript checks \texttt{value === undefined} strictly before evaluating a default expression, treating \texttt{null} as a defined value.
+
+  \item \textbf{Reassigning existing variables with \texttt{\{ ... \}} requires parentheses} (\texttt{js/pitfalls.mjs}):
+\begin{lstlisting}
+let existingPeak = 'Old Peak'
+;({ peak: existingPeak } = { peak: 'Süphan' })
+console.log('pitfall 3 (with parens):', existingPeak)
+\end{lstlisting}
+  \textbf{Real Output:} \texttt{pitfall 3 (without parens): SyntaxError} / \texttt{pitfall 3 (with parens): Süphan}\\
+  \textbf{Why it happens:} Any statement starting with \texttt{\{} is parsed by JavaScript as a block statement unless wrapped in parentheses \texttt{(...)}.
+
+  \item \textbf{Destructuring copies references, not deep clones} (\texttt{js/pitfalls.mjs}):
+\begin{lstlisting}
+const originalTrip = { title: 'Kaçkar', gear: ['Axe', 'Helmet'] }
+const { gear: sharedGear } = originalTrip
+sharedGear.push('Crampons')
+console.log('pitfall 4 (original mutated):', originalTrip.gear)
+\end{lstlisting}
+  \textbf{Real Output:} \texttt{pitfall 4 (original mutated): [ 'Axe', 'Helmet', 'Crampons' ]}\\
+  \textbf{Why it happens:} Property extraction and object rest (\texttt{...others}) perform shallow assignments, so nested arrays and objects remain shared on the heap.
+
+  \item \textbf{Object destructuring matches by key; array destructuring matches by index} (\texttt{js/pitfalls.mjs}):
+\begin{lstlisting}
+const campObj = { first: 'Base Camp', second: 'Summit Camp' }
+const { second: objSecond, first: objFirst } = campObj
+const campArr = ['Base Camp', 'Summit Camp']
+const [arrSecond, arrFirst] = campArr
+\end{lstlisting}
+  \textbf{Real Output:} \texttt{pitfall 5 (object): Base Camp | Summit Camp} and \texttt{pitfall 5 (array): Summit Camp | Base Camp}\\
+  \textbf{Why it happens:} Objects are unordered maps looked up by property name, whereas arrays are ordered sequences indexed positionally from \texttt{0}.
+\end{enumerate}
+
+\section{TypeScript Topics (T1 to T5)}
+
+All five TypeScript-specific behaviors are demonstrated in \texttt{ts/types.ts}:
+
+\begin{itemize}
+  \item \textbf{T1 (\texttt{\{ x: horizontal \}} is a rename, not a type):} Writing \texttt{const \{ x: number \} = point} renames \texttt{x} to a local variable named \texttt{number}. The type annotation must always follow the entire pattern: \texttt{const \{ y: vertical \}: \{ x: number; y: number \} = point}.
+  \item \textbf{T2 (Tuple return types vs.\ \texttt{as const}):} A tuple return type \texttt{[number, string]} gives each position its exact static type, while \texttt{as const} narrows an array literal into a \texttt{readonly} tuple of literal types (\texttt{'Base'}, \texttt{'High Camp'}).
+  \item \textbf{T3 (\texttt{noUncheckedIndexedAccess}):} On \texttt{gearList: string[]}, \texttt{const [firstGear] = gearList} infers \texttt{string | undefined}. Narrowing with \texttt{firstGear !== undefined} or providing a default (\texttt{const [guaranteedGear = 'Helmet'] = gearList}) narrows the type back to \texttt{string}.
+  \item \textbf{T4 (Optional fields vs.\ defaults):} Destructuring an optional property \texttt{helmet?: boolean} produces \texttt{boolean | undefined}, whereas adding a default \texttt{crampons = false} narrows the variable's type to \texttt{boolean}.
+  \item \textbf{T5 (Compile error suppressed with \texttt{// @ts-expect-error}):} Destructuring a non-existent property \texttt{weather} from \texttt{summitRecord} triggers \texttt{TS2339: Property 'weather' does not exist on type '\{ peak: string; elevation: number; \}'}. Adding \texttt{weather?: string} to the type and a default value resolves the error cleanly.
+\end{itemize}
+
+\section{React Props and Children (P1 to P7)}
+
+In React, every component function receives \textbf{one single argument}: an object called \texttt{props}. JSX attributes and nested tag content are combined into that single \texttt{props} object, with the body between tags placed under \texttt{props.children}.
+
+\subsection{P1 and P2: Props Is One Object and \texttt{children} Is Only a Prop}
+\texttt{CardA(props)} and \texttt{CardB(\{ title, children \})} compile identically: \texttt{CardB} combines Form 11 (parameter destructuring) and Form 5 (object destructuring). Likewise, \texttt{<CardB title="Kaçkar">Ridge route</CardB>} and \texttt{<CardB title="Kaçkar" children="Ridge route" />} produce the exact same markup:
+\begin{lstlisting}
+P1 A: <section><h2>Hi</h2>text</section>
+P1 B: <section><h2>Hi</h2>text</section>
+P2 tag body: <section><h2>Kaçkar</h2>Ridge route</section>
+P2 prop attr: <section><h2>Kaçkar</h2>Ridge route</section>
+\end{lstlisting}
+
+\subsection{P3: What \texttt{children} Can Be}
+Table~\ref{tab:p3} records the real output of \texttt{renderToStaticMarkup(<Slot label=\{...\}>\{value\}</Slot>)} across all eight child types in \texttt{js/props.jsx}.
+
+\begin{table}[ht]
+\centering
+\caption{Rendered HTML output for eight \texttt{children} types in React.}
+\label{tab:p3}
+\rowcolors{2}{rowtint}{white}
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+\textbf{Child Value} & \textbf{Real Rendered HTML Output} & \textbf{Rendered?} \\
+\midrule
+\texttt{"Base camp"} (string) & \texttt{<div data-case="string">Base camp</div>} & Yes (text node) \\
+\texttt{\{3932\}} (number) & \texttt{<div data-case="number">3932</div>} & Yes (text node) \\
+\texttt{<span>Alpine</span>} & \texttt{<div data-case="one-el"><span>Alpine</span></div>} & Yes (1 element) \\
+Two \texttt{<span>} elements & \texttt{<div data-case="multi-el"><span>Day 1</span><span>Day 2</span></div>} & Yes (array) \\
+\texttt{\{undefined\}} & \texttt{<div data-case="undef"></div>} & No (ignored) \\
+\texttt{\{null\}} & \texttt{<div data-case="null"></div>} & No (ignored) \\
+\texttt{\{false\}} & \texttt{<div data-case="false"></div>} & No (ignored) \\
+\texttt{\{() => 'ignored'\}} & \texttt{<div data-case="fn"></div>} (+ console warning) & No (warned) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{P4 to P7: Rest Spread Order, Design Choice, Defaults, and Types}
+\begin{itemize}
+  \item \textbf{P4 (Rest props and spread order):} Separating \texttt{(\{ title, children, ...rest \})} keeps \texttt{title} and \texttt{children} off the DOM attributes. Placing \texttt{\{...rest\}} \emph{after} \texttt{className="panel-default"} lets caller attributes override defaults (\texttt{class="panel-custom"}), while placing \texttt{\{...rest\}} \emph{before} \texttt{className="panel-forced"} enforces the component's own class.
+  \item \textbf{P5 (Props vs.\ \texttt{children}):} Named props (\texttt{header}, \texttt{footer}) enforce fixed layout slots, whereas \texttt{children} suits flexible wrapper components whose caller controls the internal markup.
+  \item \textbf{P6 (Defaults on props):} \texttt{<DifficultyBadge />} and \texttt{<DifficultyBadge level=\{undefined\} />} both render \texttt{<span class="badge">Unrated</span>}, whereas \texttt{<DifficultyBadge level=\{null\} />} bypasses the default and renders \texttt{<span class="badge"></span>}.
+  \item \textbf{P7 (TypeScript prop types):} \texttt{children?: ReactNode} explicitly permits valid renderable children; \texttt{PropsWithChildren<T>} intersects \texttt{T} with \texttt{\{ children?: ReactNode \}}; and \texttt{ComponentProps<'button'>} inherits all native \texttt{<button>} attributes for type-safe \texttt{\{...rest\}} spreading.
+\end{itemize}
+
+\section{JavaScript vs.\ TypeScript Comparison}
+
+Table~\ref{tab:jsvsts} summarizes what remains identical at runtime and what static type annotations are required in TypeScript.
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of destructuring forms across JavaScript and strict TypeScript.}
+\label{tab:jsvsts}
+\rowcolors{2}{rowtint}{white}
+\begin{tabularx}{\textwidth}{l X X X}
+\toprule
+\textbf{Form / Topic} & \textbf{Stays the Same in TS} & \textbf{Must Add in TS} & \textbf{Compiler Error When Wrong} \\
+\midrule
+Form 1 (\texttt{[x, y] = f()}) & Positional array pattern & Tuple return type \texttt{: [number, number]} & Inferred \texttt{number | undefined} if typed as \texttt{number[]} \\
+Form 2 (\texttt{[, b, ...rest]}) & Comma skipping and rest syntax & Narrowing or \texttt{??} under \texttt{noUncheckedIndexedAccess} & \texttt{TS18048: 'secondStage' is possibly 'undefined'} \\
+Form 3 (\texttt{[a, b] = [b, a]}) & In-place swap syntax & Matching types on both \texttt{let} variables & \texttt{TS2322: Type 'number' is not assignable to 'string'} \\
+Form 4 (\texttt{[a = 1] = []}) & Default value \texttt{=} syntax & Optional tuple \texttt{[string?]} or \texttt{string[]} & \texttt{TS2322} if default value type conflicts \\
+Form 5 (\texttt{\{ a, b \} = t}) & Property lookup by name & Object \texttt{type} or \texttt{interface} & \texttt{TS2339: Property 'x' does not exist on type} \\
+Form 6 (\texttt{\{ a: alpha \}}) & Rename colon syntax & Type annotation \emph{after} the whole pattern & \texttt{TS2304} if written \texttt{\{ peak: string \}} \\
+Form 7 (\texttt{\{ a = 1 \} = t}) & Object default value syntax & Optional property \texttt{a?: number} in type & \texttt{TS2322} if default disagrees with field type \\
+Form 8 (\texttt{\{ a, ...rest \}}) & Rest object collection & Typed source object for \texttt{Omit} inference & \texttt{TS2700: Rest types may only be created from object types} \\
+Form 11 (\texttt{f(\{ a \} = \{\})}) & Parameter pattern and \texttt{= \{\}} & Parameter type annotation \texttt{: Options} & \texttt{TS2554: Expected 1 arguments, but got 0} \\
+Props P1--P7 & JSX parameter destructuring & \texttt{children?: ReactNode} or \texttt{PropsWithChildren} & \texttt{TS2339: Property 'children' does not exist on type} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{My Own Log}
+
+\begin{enumerate}
+  \item \textbf{Running \texttt{npm install} in the parent directory (\texttt{ENOENT}):} Running \texttt{npm install} inside \texttt{mis 233 assignment 4/} instead of \texttt{starter-2/} failed with \texttt{ENOENT: Could not read package.json}. Moving into \texttt{starter-2/} resolved it.
+  \item \textbf{64 TypeScript errors before installing packages (\texttt{TS2307}):} Opening \texttt{ts/props.tsx} before \texttt{npm install} produced \texttt{Cannot find module 'react'} (\texttt{ts(2307)}). Installing dependencies added \texttt{@types/react} and cleared every diagnostic.
+  \item \textbf{Passing a function child in P3:} Rendering \texttt{<Slot label="fn">\{() => 'ignored'\}</Slot>} produced an empty \texttt{<div></div>} and triggered React's runtime warning: \texttt{Functions are not valid as a React child}.
+  \item \textbf{\texttt{noUncheckedIndexedAccess} on array destructuring (\texttt{TS18048}):} Destructuring \texttt{const [, secondStage] = stages} on \texttt{string[]} inferred \texttt{string | undefined}, requiring explicit narrowing with \texttt{??}.
+  \item \textbf{Passing \texttt{null} vs.\ \texttt{undefined} to a defaulted prop in P6:} \texttt{<DifficultyBadge level=\{null\} />} rendered an empty \texttt{<span></span>} rather than \texttt{'Unrated'} because defaults check strictly for \texttt{undefined}.
+\end{enumerate}
+
+\section{Summary of Bonus Work}
+
+\begin{itemize}
+  \item \textbf{Bonus 1 (LaTeX):} Typeset this complete field guide in \texttt{guide.tex} and compiled it to \texttt{guide.pdf} using \texttt{pdflatex -interaction=nonstopmode guide.tex} (run twice for table of contents references).
+  \item \textbf{Bonus 2 (Depth, \texttt{ts/depth.ts}):} Verified \texttt{[Symbol.iterator]} consumption on strings, \texttt{Set}, and infinite generators; confirmed lazy left-to-right default evaluation; demonstrated property assignment targets and \texttt{for...in} string-index destructuring; and implemented type-level \texttt{Head<T>} / \texttt{Tail<T>} helpers using \texttt{infer}.
+  \item \textbf{Bonus 3 (Real Code):} Analyzed five real destructuring instances in the Assignment 3 Task Manager starter (\texttt{starter/src/App.tsx} lines 13, 26, 70, 90 and \texttt{starter/src/TaskRow.tsx} line 5), mapping each to Forms 1, 5, and 11, comparing explicit \texttt{props} vs.\ \texttt{children}, and critiquing multi-line destructured signatures in \texttt{FilterBar}.
+  \item \textbf{Bonus 4 (Git Repository):} Hosted at \url{https://github.com/mfurkanyilzm-code/mis-233-assignment-4-} with a clean \texttt{.gitignore} and incremental commits across JavaScript, TypeScript, React, and documentation milestones.
+\end{itemize}
+
+\end{document}
